@@ -2,6 +2,8 @@
 
 A comprehensive web-based medical detection system that uses machine learning to assess the risk of multiple diseases including Diabetes, Stroke, Chronic Kidney Disease (CKD), Lung Cancer, and Alzheimer's Disease.
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/angelinadegay/disease_class.git)
+
 ## Features
 
 - **Multi-Disease Risk Assessment**
@@ -36,8 +38,8 @@ A comprehensive web-based medical detection system that uses machine learning to
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/multi-disease-detection.git
-cd multi-disease-detection
+git clone https://github.com/angelinadegay/disease_class.git
+cd disease_class
 ```
 
 2. Create and activate a virtual environment:
@@ -59,7 +61,11 @@ pip install -r requirements.txt
 ## Project Structure
 
 ```
-multi-disease-detection/
+disease_class/
+├── data/               # Dataset storage
+├── dataFresh/         # Fresh datasets
+├── datasets/          # Processed datasets
+├── notebooks/         # Jupyter notebooks for analysis
 ├── src/
 │   ├── templates/
 │   │   └── index.html
@@ -119,6 +125,10 @@ The system uses pre-trained machine learning models for each disease:
 - **Lung Cancer Model**: Predicts lung cancer risk based on symptoms and lifestyle factors
 - **Alzheimer's Model**: Assesses Alzheimer's risk using cognitive scores and health metrics
 
+## Development
+
+The project includes Jupyter notebooks for data analysis and model development. You can find them in the `notebooks/` directory.
+
 ## Contributing
 
 1. Fork the repository
@@ -137,7 +147,7 @@ This system is for educational and research purposes only. It should not be used
 
 ## Support
 
-For support, please open an issue in the GitHub repository or contact the development team.
+For support, please open an issue in the [GitHub repository](https://github.com/angelinadegay/disease_class/issues) or contact the development team.
 
 ## Acknowledgments
 
