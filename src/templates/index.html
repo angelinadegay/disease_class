@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Disease Medical Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--primary-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .form-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: transform var(--transition-speed);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--light-bg);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--secondary-color);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .required-field::after {
+            content: "*";
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        #results {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prediction-card {
+            border-radius: 15px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            height: 100%;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .prediction-card .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .prediction-card .card-text {
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .loading-steps {
+            margin-top: 2rem;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .loading-step {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: var(--light-bg);
+            transition: all var(--transition-speed);
+        }
+
+        .loading-step i {
+            margin-right: 1rem;
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .loading-step.completed {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--success-color);
+        }
+
+        .loading-step.current {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .loading-step.pending {
+            color: #6c757d;
+        }
+
+        .processing-time {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .risk-high {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .risk-medium {
+            color: var(--warning-color);
+            font-weight: 600;
+        }
+
+        .risk-low {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .prediction-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-5">Multi-Disease Medical Detection System</h1>
+        
+        <form id="medicalForm" class="needs-validation" novalidate>
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h3 class="section-title">Personal Information</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="age">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" required 
+                               value="{{ sample_patient.age }}">
+                        <small class="form-text text-muted">Age in years</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="gender">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.gender == 1 %}selected{% endif %}>Male</option>
+                            <option value="0" {% if sample_patient.gender == 0 %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Pregnancies">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="Pregnancies" name="Pregnancies" 
+                               value="{{ sample_patient.Pregnancies }}">
+                        <small class="form-text text-muted">Total number of times pregnant</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Glucose">Blood Glucose Level</label>
+                        <input type="number" class="form-control" id="Glucose" name="Glucose" required 
+                               value="{{ sample_patient.Glucose }}">
+                        <small class="form-text text-muted">Plasma glucose concentration in mg/dL (2-hour glucose tolerance test)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BloodPressure">Blood Pressure</label>
+                        <input type="number" class="form-control" id="BloodPressure" name="BloodPressure" required 
+                               value="{{ sample_patient.BloodPressure }}">
+                        <small class="form-text text-muted">Diastolic blood pressure in mmHg</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="SkinThickness">Skin Thickness</label>
+                        <input type="number" class="form-control" id="SkinThickness" name="SkinThickness" 
+                               value="{{ sample_patient.SkinThickness }}">
+                        <small class="form-text text-muted">Triceps skin fold thickness in mm</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Insulin">Insulin Level</label>
+                        <input type="number" class="form-control" id="Insulin" name="Insulin" 
+                               value="{{ sample_patient.Insulin }}">
+                        <small class="form-text text-muted">2-hour serum insulin in mu U/ml</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BMI">Body Mass Index</label>
+                        <input type="number" class="form-control" id="BMI" name="BMI" required 
+                               value="{{ sample_patient.BMI }}">
+                        <small class="form-text text-muted">Weight in kg / (height in m)²</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="DiabetesPedigreeFunction">Diabetes Pedigree Function</label>
+                        <input type="number" class="form-control" id="DiabetesPedigreeFunction" name="DiabetesPedigreeFunction" 
+                               value="{{ sample_patient.DiabetesPedigreeFunction }}">
+                        <small class="form-text text-muted">A function that scores the likelihood of diabetes based on family history</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vital Signs -->
+            <div class="form-section">
+                <h3 class="section-title">Vital Signs</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Pregnancies">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="Pregnancies" name="Pregnancies" 
+                               value="{{ sample_patient.Pregnancies }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Glucose">Blood Glucose (mg/dL)</label>
+                        <input type="number" class="form-control" id="Glucose" name="Glucose" required 
+                               value="{{ sample_patient.Glucose }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BloodPressure">Blood Pressure (mmHg)</label>
+                        <input type="number" class="form-control" id="BloodPressure" name="BloodPressure" required 
+                               value="{{ sample_patient.BloodPressure }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="SkinThickness">Skin Thickness (mm)</label>
+                        <input type="number" class="form-control" id="SkinThickness" name="SkinThickness" 
+                               value="{{ sample_patient.SkinThickness }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Insulin">Insulin (mu U/ml)</label>
+                        <input type="number" class="form-control" id="Insulin" name="Insulin" 
+                               value="{{ sample_patient.Insulin }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BMI">BMI</label>
+                        <input type="number" class="form-control" id="BMI" name="BMI" required 
+                               value="{{ sample_patient.BMI }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="DiabetesPedigreeFunction">Diabetes Pedigree Function</label>
+                        <input type="number" class="form-control" id="DiabetesPedigreeFunction" name="DiabetesPedigreeFunction" 
+                               value="{{ sample_patient.DiabetesPedigreeFunction }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Medical History -->
+            <div class="form-section">
+                <h3 class="section-title">Medical History</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="hypertension" name="hypertension"
+                                   {% if sample_patient.hypertension %}checked{% endif %}>
+                            <label class="form-check-label" for="hypertension">Hypertension</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="heart_disease" name="heart_disease"
+                                   {% if sample_patient.heart_disease %}checked{% endif %}>
+                            <label class="form-check-label" for="heart_disease">Heart Disease</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="diabetes" name="diabetes"
+                                   {% if sample_patient.diabetes %}checked{% endif %}>
+                            <label class="form-check-label" for="diabetes">Diabetes</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lifestyle -->
+            <div class="form-section">
+                <h3 class="section-title">Lifestyle</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="SMOKING">Smoking Status</label>
+                        <select class="form-select" id="SMOKING" name="SMOKING" required>
+                            <option value="">Select...</option>
+                            <option value="0" {% if sample_patient.SMOKING == 0 %}selected{% endif %}>Non-smoker</option>
+                            <option value="1" {% if sample_patient.SMOKING == 1 %}selected{% endif %}>Smoker</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="alcohol_consumption">Alcohol Consumption</label>
+                        <input type="number" class="form-control" id="alcohol_consumption" name="alcohol_consumption" required 
+                               value="{{ sample_patient.alcohol_consumption }}">
+                        <small class="form-text text-muted">Number of standard drinks per week (1 standard drink = 14g pure alcohol)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="physical_activity">Physical Activity (hours/week)</label>
+                        <input type="number" class="form-control" id="physical_activity" name="physical_activity" required 
+                               value="{{ sample_patient.physical_activity }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lab Results -->
+            <div class="form-section">
+                <h3 class="section-title">Lab Results</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="albumin">Albumin (g/dL)</label>
+                        <input type="number" class="form-control" id="albumin" name="albumin" 
+                               value="{{ sample_patient.albumin }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="blood_urea_nitrogen">Blood Urea Nitrogen (mg/dL)</label>
+                        <input type="number" class="form-control" id="blood_urea_nitrogen" name="blood_urea_nitrogen" 
+                               value="{{ sample_patient.blood_urea_nitrogen }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="creatinine">Creatinine (mg/dL)</label>
+                        <input type="number" class="form-control" id="creatinine" name="creatinine" 
+                               value="{{ sample_patient.creatinine }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="sodium">Sodium (mEq/L)</label>
+                        <input type="number" class="form-control" id="sodium" name="sodium" 
+                               value="{{ sample_patient.sodium }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="potassium">Potassium (mEq/L)</label>
+                        <input type="number" class="form-control" id="potassium" name="potassium" 
+                               value="{{ sample_patient.potassium }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="hemoglobin">Hemoglobin (g/dL)</label>
+                        <input type="number" class="form-control" id="hemoglobin" name="hemoglobin" 
+                               value="{{ sample_patient.hemoglobin }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="white_blood_cells">White Blood Cells (K/uL)</label>
+                        <input type="number" class="form-control" id="white_blood_cells" name="white_blood_cells" 
+                               value="{{ sample_patient.white_blood_cells }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="red_blood_cells">Red Blood Cells (M/uL)</label>
+                        <input type="number" class="form-control" id="red_blood_cells" name="red_blood_cells" 
+                               value="{{ sample_patient.red_blood_cells }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Symptoms -->
+            <div class="form-section">
+                <h3 class="section-title">Symptoms</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="cough" name="cough"
+                                   {% if sample_patient.cough %}checked{% endif %}>
+                            <label class="form-check-label" for="cough">Cough</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="fatigue" name="fatigue"
+                                   {% if sample_patient.fatigue %}checked{% endif %}>
+                            <label class="form-check-label" for="fatigue">Fatigue</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="shortness_of_breath" name="shortness_of_breath"
+                                   {% if sample_patient.shortness_of_breath %}checked{% endif %}>
+                            <label class="form-check-label" for="shortness_of_breath">Shortness of Breath</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chest_pain" name="chest_pain"
+                                   {% if sample_patient.chest_pain %}checked{% endif %}>
+                            <label class="form-check-label" for="chest_pain">Chest Pain</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="weight_loss" name="weight_loss"
+                                   {% if sample_patient.weight_loss %}checked{% endif %}>
+                            <label class="form-check-label" for="weight_loss">Weight Loss</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="form-section">
+                <h3 class="section-title">Additional Information</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Pregnancies">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="Pregnancies" name="Pregnancies" 
+                               value="{{ sample_patient.Pregnancies }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Glucose">Blood Glucose (mg/dL)</label>
+                        <input type="number" class="form-control" id="Glucose" name="Glucose" required 
+                               value="{{ sample_patient.Glucose }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="BloodPressure">Blood Pressure (mmHg)</label>
+                        <input type="number" class="form-control" id="BloodPressure" name="BloodPressure" required 
+                               value="{{ sample_patient.BloodPressure }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="SkinThickness">Skin Thickness (mm)</label>
+                        <input type="number" class="form-control" id="SkinThickness" name="SkinThickness" 
+                               value="{{ sample_patient.SkinThickness }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Insulin">Insulin (mu U/ml)</label>
+                        <input type="number" class="form-control" id="Insulin" name="Insulin" 
+                               value="{{ sample_patient.Insulin }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="BMI">BMI</label>
+                        <input type="number" class="form-control" id="BMI" name="BMI" required 
+                               value="{{ sample_patient.BMI }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="DiabetesPedigreeFunction">Diabetes Pedigree Function</label>
+                        <input type="number" class="form-control" id="DiabetesPedigreeFunction" name="DiabetesPedigreeFunction" 
+                               value="{{ sample_patient.DiabetesPedigreeFunction }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Diabetes Features -->
+            <div class="form-section">
+                <h3 class="section-title">Diabetes Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Pregnancies">Number of Pregnancies</label>
+                        <input type="number" class="form-control" id="Pregnancies" name="Pregnancies" value="{{ sample_patient.Pregnancies }}">
+                        <small class="form-text text-muted">Total number of times pregnant</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Glucose">Blood Glucose Level</label>
+                        <input type="number" class="form-control" id="Glucose" name="Glucose" required value="{{ sample_patient.Glucose }}">
+                        <small class="form-text text-muted">Plasma glucose concentration in mg/dL (2-hour glucose tolerance test)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BloodPressure">Blood Pressure</label>
+                        <input type="number" class="form-control" id="BloodPressure" name="BloodPressure" required value="{{ sample_patient.BloodPressure }}">
+                        <small class="form-text text-muted">Diastolic blood pressure in mmHg</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="SkinThickness">Skin Thickness</label>
+                        <input type="number" class="form-control" id="SkinThickness" name="SkinThickness" value="{{ sample_patient.SkinThickness }}">
+                        <small class="form-text text-muted">Triceps skin fold thickness in mm</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Insulin">Insulin Level</label>
+                        <input type="number" class="form-control" id="Insulin" name="Insulin" value="{{ sample_patient.Insulin }}">
+                        <small class="form-text text-muted">2-hour serum insulin in mu U/ml</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="BMI">Body Mass Index</label>
+                        <input type="number" class="form-control" id="BMI" name="BMI" required value="{{ sample_patient.BMI }}">
+                        <small class="form-text text-muted">Weight in kg / (height in m)²</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="DiabetesPedigreeFunction">Diabetes Pedigree Function</label>
+                        <input type="number" class="form-control" id="DiabetesPedigreeFunction" name="DiabetesPedigreeFunction" value="{{ sample_patient.DiabetesPedigreeFunction }}">
+                        <small class="form-text text-muted">A function that scores the likelihood of diabetes based on family history</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Age">Age</label>
+                        <input type="number" class="form-control" id="Age" name="Age" required value="{{ sample_patient.Age }}">
+                        <small class="form-text text-muted">Age in years</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stroke Features -->
+            <div class="form-section">
+                <h3 class="section-title">Stroke Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="gender">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.gender == 1 %}selected{% endif %}>Male</option>
+                            <option value="0" {% if sample_patient.gender == 0 %}selected{% endif %}>Female</option>
+                        </select>
+                        <small class="form-text text-muted">Patient's gender</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="age">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" required 
+                               value="{{ sample_patient.age }}">
+                        <small class="form-text text-muted">Age in years</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="hypertension">Hypertension</label>
+                        <select class="form-select" id="hypertension" name="hypertension" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.hypertension == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.hypertension == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">History of hypertension</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="heart_disease">Heart Disease</label>
+                        <select class="form-select" id="heart_disease" name="heart_disease" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.heart_disease == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.heart_disease == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">History of heart disease</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ever_married">Marital Status</label>
+                        <select class="form-select" id="ever_married" name="ever_married" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.ever_married == 1 %}selected{% endif %}>Married</option>
+                            <option value="0" {% if sample_patient.ever_married == 0 %}selected{% endif %}>Never Married</option>
+                        </select>
+                        <small class="form-text text-muted">Whether the patient has ever been married</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="work_type">Employment Type</label>
+                        <select class="form-select" id="work_type" name="work_type" required>
+                            <option value="">Select...</option>
+                            <option value="0" {% if sample_patient.work_type == 0 %}selected{% endif %}>Private Sector</option>
+                            <option value="1" {% if sample_patient.work_type == 1 %}selected{% endif %}>Self-employed</option>
+                            <option value="2" {% if sample_patient.work_type == 2 %}selected{% endif %}>Government Job</option>
+                        </select>
+                        <small class="form-text text-muted">Type of employment</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="Residence_type">Residence Type</label>
+                        <select class="form-select" id="Residence_type" name="Residence_type" required>
+                            <option value="">Select...</option>
+                            <option value="0" {% if sample_patient.Residence_type == 0 %}selected{% endif %}>Urban</option>
+                            <option value="1" {% if sample_patient.Residence_type == 1 %}selected{% endif %}>Rural</option>
+                        </select>
+                        <small class="form-text text-muted">Type of residence area</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="avg_glucose_level">Average Glucose Level</label>
+                        <input type="number" class="form-control" id="avg_glucose_level" name="avg_glucose_level" required 
+                               value="{{ sample_patient.avg_glucose_level }}">
+                        <small class="form-text text-muted">Average blood glucose level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="bmi">Body Mass Index</label>
+                        <input type="number" class="form-control" id="bmi" name="bmi" required 
+                               value="{{ sample_patient.bmi }}">
+                        <small class="form-text text-muted">Weight in kg / (height in m)²</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="smoking_status">Smoking Status</label>
+                        <select class="form-select" id="smoking_status" name="smoking_status" required>
+                            <option value="">Select...</option>
+                            <option value="0" {% if sample_patient.smoking_status == 0 %}selected{% endif %}>Never Smoked</option>
+                            <option value="1" {% if sample_patient.smoking_status == 1 %}selected{% endif %}>Formerly Smoked</option>
+                            <option value="2" {% if sample_patient.smoking_status == 2 %}selected{% endif %}>Currently Smokes</option>
+                        </select>
+                        <small class="form-text text-muted">Current smoking status</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Lung Cancer Features -->
+            <div class="form-section">
+                <h3 class="section-title">Lung Cancer Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="GENDER">Gender</label>
+                        <select class="form-select" id="GENDER" name="GENDER" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.GENDER == 1 %}selected{% endif %}>Male</option>
+                            <option value="0" {% if sample_patient.GENDER == 0 %}selected{% endif %}>Female</option>
+                        </select>
+                        <small class="form-text text-muted">Patient's gender</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="AGE">Age</label>
+                        <input type="number" class="form-control" id="AGE" name="AGE" required 
+                               value="{{ sample_patient.AGE }}">
+                        <small class="form-text text-muted">Age in years</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="SMOKING">Smoking Status</label>
+                        <select class="form-select" id="SMOKING" name="SMOKING" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.SMOKING == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.SMOKING == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Current smoking status</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="YELLOW_FINGERS">Yellow Fingers</label>
+                        <select class="form-select" id="YELLOW_FINGERS" name="YELLOW_FINGERS" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.YELLOW_FINGERS == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.YELLOW_FINGERS == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of yellow fingers</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ANXIETY">Anxiety</label>
+                        <select class="form-select" id="ANXIETY" name="ANXIETY" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.ANXIETY == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.ANXIETY == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of anxiety</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="PEER_PRESSURE">Peer Pressure</label>
+                        <select class="form-select" id="PEER_PRESSURE" name="PEER_PRESSURE" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.PEER_PRESSURE == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.PEER_PRESSURE == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Experienced peer pressure to smoke</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CHRONIC DISEASE">Chronic Disease</label>
+                        <select class="form-select" id="CHRONIC DISEASE" name="CHRONIC DISEASE" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['CHRONIC DISEASE'] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['CHRONIC DISEASE'] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of chronic disease</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="FATIGUE ">Fatigue</label>
+                        <select class="form-select" id="FATIGUE " name="FATIGUE " required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['FATIGUE '] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['FATIGUE '] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of fatigue</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ALLERGY ">Allergy</label>
+                        <select class="form-select" id="ALLERGY " name="ALLERGY " required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['ALLERGY '] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['ALLERGY '] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of allergy</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="WHEEZING">Wheezing</label>
+                        <select class="form-select" id="WHEEZING" name="WHEEZING" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.WHEEZING == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.WHEEZING == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of wheezing</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ALCOHOL CONSUMING">Alcohol Consumption</label>
+                        <select class="form-select" id="ALCOHOL CONSUMING" name="ALCOHOL CONSUMING" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['ALCOHOL CONSUMING'] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['ALCOHOL CONSUMING'] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Do you regularly consume alcohol? (Yes/No)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="COUGHING">Coughing</label>
+                        <select class="form-select" id="COUGHING" name="COUGHING" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient.COUGHING == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient.COUGHING == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of coughing</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="SHORTNESS OF BREATH">Shortness of Breath</label>
+                        <select class="form-select" id="SHORTNESS OF BREATH" name="SHORTNESS OF BREATH" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['SHORTNESS OF BREATH'] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['SHORTNESS OF BREATH'] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of shortness of breath</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="SWALLOWING DIFFICULTY">Swallowing Difficulty</label>
+                        <select class="form-select" id="SWALLOWING DIFFICULTY" name="SWALLOWING DIFFICULTY" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['SWALLOWING DIFFICULTY'] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['SWALLOWING DIFFICULTY'] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of swallowing difficulty</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CHEST PAIN">Chest Pain</label>
+                        <select class="form-select" id="CHEST PAIN" name="CHEST PAIN" required>
+                            <option value="">Select...</option>
+                            <option value="1" {% if sample_patient['CHEST PAIN'] == 1 %}selected{% endif %}>Yes</option>
+                            <option value="0" {% if sample_patient['CHEST PAIN'] == 0 %}selected{% endif %}>No</option>
+                        </select>
+                        <small class="form-text text-muted">Presence of chest pain</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alzheimer's Features -->
+            <div class="form-section">
+                <h3 class="section-title">Alzheimer's Disease Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="SleepQuality">Sleep Quality</label>
+                        <input type="number" class="form-control" id="SleepQuality" name="SleepQuality" step="0.1" required
+                               value="{{ sample_patient.SleepQuality }}">
+                        <small class="form-text text-muted">Sleep quality score (0-10)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CholesterolTriglycerides">Cholesterol Triglycerides</label>
+                        <input type="number" class="form-control" id="CholesterolTriglycerides" name="CholesterolTriglycerides" step="0.1" required
+                               value="{{ sample_patient.CholesterolTriglycerides }}">
+                        <small class="form-text text-muted">Cholesterol triglycerides level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CholesterolTotal">Total Cholesterol</label>
+                        <input type="number" class="form-control" id="CholesterolTotal" name="CholesterolTotal" step="0.1" required
+                               value="{{ sample_patient.CholesterolTotal }}">
+                        <small class="form-text text-muted">Total cholesterol level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="MMSE">MMSE Score</label>
+                        <input type="number" class="form-control" id="MMSE" name="MMSE" step="0.1" required
+                               value="{{ sample_patient.MMSE }}">
+                        <small class="form-text text-muted">Mini-Mental State Examination score (0-30)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CholesterolLDL">LDL Cholesterol</label>
+                        <input type="number" class="form-control" id="CholesterolLDL" name="CholesterolLDL" step="0.1" required
+                               value="{{ sample_patient.CholesterolLDL }}">
+                        <small class="form-text text-muted">LDL cholesterol level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="CholesterolHDL">HDL Cholesterol</label>
+                        <input type="number" class="form-control" id="CholesterolHDL" name="CholesterolHDL" step="0.1" required
+                               value="{{ sample_patient.CholesterolHDL }}">
+                        <small class="form-text text-muted">HDL cholesterol level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ADL">ADL Score</label>
+                        <input type="number" class="form-control" id="ADL" name="ADL" step="0.1" required
+                               value="{{ sample_patient.ADL }}">
+                        <small class="form-text text-muted">Activities of Daily Living score (0-10)</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="AlcoholConsumption">Alcohol Consumption</label>
+                        <input type="number" class="form-control" id="AlcoholConsumption" name="AlcoholConsumption" step="0.1" required
+                               value="{{ sample_patient.AlcoholConsumption }}">
+                        <small class="form-text text-muted">Alcohol consumption in standard drinks per week</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="PhysicalActivity">Physical Activity</label>
+                        <input type="number" class="form-control" id="PhysicalActivity" name="PhysicalActivity" step="0.1" required
+                               value="{{ sample_patient.PhysicalActivity }}">
+                        <small class="form-text text-muted">Physical activity score (0-10)</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CKD Features -->
+            <div class="form-section">
+                <h3 class="section-title">Chronic Kidney Disease Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="ckd-age">Age</label>
+                        <input type="number" class="form-control" id="ckd-age" name="ckd-age" required 
+                               value="{{ sample_patient.age }}">
+                        <small class="form-text text-muted">Age in years</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="albumin">Albumin</label>
+                        <input type="number" class="form-control" id="albumin" name="albumin" step="0.1" required
+                               value="{{ sample_patient.albumin }}">
+                        <small class="form-text text-muted">Albumin level in g/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="sugar">Sugar</label>
+                        <input type="number" class="form-control" id="sugar" name="sugar" step="0.1" required
+                               value="{{ sample_patient.sugar }}">
+                        <small class="form-text text-muted">Blood sugar level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="blood_glucose_random">Blood Glucose Random</label>
+                        <input type="number" class="form-control" id="blood_glucose_random" name="blood_glucose_random" step="0.1" required
+                               value="{{ sample_patient.blood_glucose_random }}">
+                        <small class="form-text text-muted">Random blood glucose level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="blood_urea">Blood Urea</label>
+                        <input type="number" class="form-control" id="blood_urea" name="blood_urea" step="0.1" required
+                               value="{{ sample_patient.blood_urea }}">
+                        <small class="form-text text-muted">Blood urea level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="serum_creatinine">Serum Creatinine</label>
+                        <input type="number" class="form-control" id="serum_creatinine" name="serum_creatinine" step="0.1" required
+                               value="{{ sample_patient.serum_creatinine }}">
+                        <small class="form-text text-muted">Serum creatinine level in mg/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="haemoglobin">Haemoglobin</label>
+                        <input type="number" class="form-control" id="haemoglobin" name="haemoglobin" step="0.1" required
+                               value="{{ sample_patient.haemoglobin }}">
+                        <small class="form-text text-muted">Hemoglobin level in g/dL</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="packed_cell_volume">Packed Cell Volume</label>
+                        <input type="number" class="form-control" id="packed_cell_volume" name="packed_cell_volume" step="0.1" required
+                               value="{{ sample_patient.packed_cell_volume }}">
+                        <small class="form-text text-muted">Packed cell volume percentage</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="white_blood_cell_count">White Blood Cell Count</label>
+                        <input type="number" class="form-control" id="white_blood_cell_count" name="white_blood_cell_count" step="0.1" required
+                               value="{{ sample_patient.white_blood_cell_count }}">
+                        <small class="form-text text-muted">White blood cell count in cells/cubic mm</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field" for="hypertension">Hypertension</label>
+                        <select class="form-select" id="hypertension" name="hypertension" required>
+                            <option value="">Select...</option>
+                            <option value="0" {% if sample_patient.hypertension == 0 %}selected{% endif %}>No</option>
+                            <option value="1" {% if sample_patient.hypertension == 1 %}selected{% endif %}>Yes</option>
+                        </select>
+                        <small class="form-text text-muted">History of hypertension</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-heartbeat me-2"></i>Analyze Health Data
+                </button>
+            </div>
+        </form>
+        
+        <div class="loading mt-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Analyzing health data...</p>
+            <div class="loading-steps">
+                <div class="loading-step pending" id="step-data-collection">
+                    <i class="fas fa-circle"></i>
+                    <span>Collecting form data</span>
+                </div>
+                <div class="loading-step pending" id="step-data-processing">
+                    <i class="fas fa-circle"></i>
+                    <span>Processing input data</span>
+                </div>
+                <div class="loading-step pending" id="step-prediction">
+                    <i class="fas fa-circle"></i>
+                    <span>Running disease predictions</span>
+                </div>
+                <div class="loading-step pending" id="step-results">
+                    <i class="fas fa-circle"></i>
+                    <span>Preparing results</span>
+                </div>
+            </div>
+            <div class="processing-time" id="processing-time"></div>
+        </div>
+        
+        <div id="results" class="mt-4">
+            <h2 class="text-center mb-4">Analysis Results</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card prediction-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Diabetes Risk</h5>
+                            <p class="card-text" id="diabetes-risk">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card prediction-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Stroke Risk</h5>
+                            <p class="card-text" id="stroke-risk">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card prediction-card">
+                        <div class="card-body">
+                            <h5 class="card-title">CKD Risk</h5>
+                            <p class="card-text" id="ckd-risk">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card prediction-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Lung Cancer Risk</h5>
+                            <p class="card-text" id="lung-cancer-risk">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card prediction-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Alzheimer's Risk</h5>
+                            <p class="card-text" id="alzheimers-risk">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to sync age across all forms
+        function syncAge() {
+            const mainAge = document.getElementById('age').value;
+            const ageFields = [
+                'ckd-age',
+                'Age',
+                'AGE',
+                'age'
+            ];
+            
+            ageFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.value = mainAge;
+                }
+            });
+        }
+
+        // Add event listener to main age input
+        document.getElementById('age').addEventListener('input', syncAge);
+        document.getElementById('age').addEventListener('change', syncAge);
+
+        // Initial sync when page loads
+        document.addEventListener('DOMContentLoaded', syncAge);
+
+        // Helper function to update loading steps
+        function updateLoadingStep(stepId, status) {
+            const step = document.getElementById(stepId);
+            if (step) {
+                step.className = `loading-step ${status}`;
+                const icon = step.querySelector('i');
+                if (icon) {
+                    if (status === 'completed') {
+                        icon.className = 'fas fa-check-circle';
+                    } else if (status === 'current') {
+                        icon.className = 'fas fa-spinner fa-spin';
+                    } else {
+                        icon.className = 'fas fa-circle';
+                    }
+                }
+            }
+        }
+
+        document.getElementById('medicalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading and reset steps
+            document.querySelector('.loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('processing-time').textContent = '';
+            
+            // Reset all steps to pending
+            ['data-collection', 'data-processing', 'step-prediction', 'results'].forEach(step => {
+                updateLoadingStep(`step-${step}`, 'pending');
+            });
+            
+            try {
+                // Step 1: Data Collection
+                updateLoadingStep('step-data-collection', 'current');
+                const formData = new FormData(e.target);
+                
+                // Convert checkbox values to 0/1
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    formData.set(checkbox.name, checkbox.checked ? '1' : '0');
+                });
+                updateLoadingStep('step-data-collection', 'completed');
+                
+                // Step 2: Data Processing
+                updateLoadingStep('step-data-processing', 'current');
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                updateLoadingStep('step-data-processing', 'completed');
+                
+                // Step 3: Prediction
+                updateLoadingStep('step-prediction', 'current');
+                const data = await response.json();
+                updateLoadingStep('step-prediction', 'completed');
+                
+                if (data.success) {
+                    // Step 4: Results
+                    updateLoadingStep('step-results', 'current');
+                    
+                    // Show results
+                    document.getElementById('results').style.display = 'block';
+                    
+                    // Update risk levels
+                    const predictions = data.predictions;
+                    
+                    // Helper function to determine risk level
+                    const getRiskLevel = (probability) => {
+                        if (probability >= 0.7) return ['High Risk', 'risk-high'];
+                        if (probability >= 0.3) return ['Medium Risk', 'risk-medium'];
+                        return ['Low Risk', 'risk-low'];
+                    };
+                    
+                    // Update each disease risk
+                    for (const [disease, probability] of Object.entries(predictions)) {
+                        // Convert disease name to match HTML ID format (e.g., 'lung_cancer' -> 'lung-cancer')
+                        const elementId = `${disease.replace('_', '-')}-risk`;
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const [riskText, riskClass] = getRiskLevel(probability);
+                            element.textContent = `${riskText} (${(probability * 100).toFixed(1)}%)`;
+                            element.className = `card-text ${riskClass}`;
+                        } else {
+                            console.warn(`Could not find element with ID: ${elementId}`);
+                        }
+                    }
+                    
+                    // Show processing time
+                    if (data.processing_time) {
+                        document.getElementById('processing-time').textContent = 
+                            `Analysis completed in ${data.processing_time} seconds`;
+                    }
+                    
+                    updateLoadingStep('step-results', 'completed');
+                } else {
+                    alert('Error: ' + data.errors.join('\n'));
+                }
+            } catch (error) {
+                alert('Error submitting form: ' + error.message);
+            } finally {
+                // Hide loading after a short delay to show completion
+                setTimeout(() => {
+                    document.querySelector('.loading').style.display = 'none';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html> 
